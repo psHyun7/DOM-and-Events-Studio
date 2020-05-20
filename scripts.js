@@ -1,69 +1,152 @@
-// Write your JavaScript code here.
-// Remember to pay attention to page loading!
+let flightStatus = null;
+let shuttleBackground = null;
+let altitude = null;
+let buttons = null;
+let fuelLevel = null;
+let chat = null;
+let takeoff = null;
+let land = null;
+let missionAbort = null;
+let rocket = null;
+let yPosPxl = null;
+let xPosPxl = null;
+let yTotalPxl = null;
+let xTotalPxl = null;
+let moveUp = null;
+let moveDown = null;
+let moveRight = null;
+let moveLeft = null;
 
-window.addEventListener("load", function() {
-    let flightStatus = document.getElementById("flightStatus");
-    let shuttleBackground = document.getElementById("shuttleBackground");
-    let shuttleHeight = document.getElementById("spaceShuttleHeight");
-  
-    let takeoff = document.getElementById("takeoff");
-    takeoff.addEventListener("click", function(event) {
-        let confirmed = confirm("Confirm that the shuttle is ready for take off");
-        if (confirmed) {
-            flightStatus.innerHTML = "Shuttle in flight.";
-            shuttleBackground.style.backgroundColor = "blue";
-            shuttleHeight.innerHTML = parseInt(shuttleHeight.innerHTML) + 10000;
-        }
-    });
-
-    let landing = document.getElementById("landing");
-    landing.addEventListener("click", function(event) {
-        alert("The shuttle is landing. Landing gear engaged.");
-        flightStatus.innerHTML = "The shuttle has landed";
-        shuttleBackground.style.backgroundColor = "green";
-        shuttleHeight.innerHTML = 0;
-    });
-
-    let missionAbort = document.getElementById("missionAbort");
-    missionAbort.addEventListener("click", function(event) {
-        let confirmed = confirm("Confirm that you want to abort the mission.");
-        if (confirmed) {
-            flightStatus.innerHTML = "Mission aborted.";
-            shuttleBackground.style.backgroundColor = "green";
-            shuttleHeight.innerHTML = 0;
-        }
-    });
-
-    let rocket = document.getElementById("rocket");
-    rocket.style.position = "relative";
-    let verticalMoved = 250;
-    // set initial vertical rocket position
-    rocket.style.top = verticalMoved + "px";
-    //declared global variable
-    horizontalMoved = 0;
-
-    let up = document.getElementById("up");
-    up.addEventListener("click", function(event) {
-        verticalMoved -= 10;
-        shuttleHeight.innerHTML = parseInt(shuttleHeight.innerHTML) + 10000;
-        rocket.style.top = verticalMoved +"px";
-    })
-    let down = document.getElementById("down");
-    down.addEventListener("click", function(event) {
-        verticalMoved += 10;
-        shuttleHeight.innerHTML = parseInt(shuttleHeight.innerHTML) - 10000;
-        rocket.style.top = verticalMoved + "px";
-    })
-    let right = document.getElementById("right");
-    right.addEventListener("click", function(event) {
-        horizontalMoved += 10;
-        rocket.style.left = horizontalMoved + "px";
-    });
+function init () {
+  flightStatus = document.getElementById("flightStatus");
+  shuttleBackground = document.getElementById("shuttleBackground");
+  altitude = document.getElementById("spaceShuttleHeight");
+  buttons = document.getElementsByTagName("button");
+  moveUp = buttons[0];
+  moveDown = buttons[1];
+  moveRight = buttons[2];
+  moveLeft = buttons[3];
+  fuelLevel = document.getElementsByTagName("p")[1];
+  chat = document.getElementsByTagName("p")[2];
+  takeoff = document.getElementById("takeoff");
+  land = document.getElementById("landing");
+  missionAbort = document.getElementById("missionAbort");
+  rocket = document.getElementById("rocket")
+  yTotalPxl = shuttleBackground.clientHeight;
+  xTotalPxl = shuttleBackground.clientWidth;
+  xTotalPxl = Math.floor(xTotalPxl/10) * 10
+  yPosPxl = yTotalPxl - 70;
+  rocket.style.top = yPosPxl + "px";
+  xPosPxl = 0;
+  rocket.style.left = xPosPxl + "px";
     
-});
+  rocket.style.position = "relative"
+  land.disabled = true;
+  moveUp.disabled = true;
+  moveDown.disabled = true;
+  moveRight.disabled = true;
+  moveLeft.disabled = true;
 
-//Trying out different way to handle event.
-function moveLeft() {
-    horizontalMoved -= 10;
-    rocket.style.left = horizontalMoved + "px";
+  takeoff.addEventListener("click", function (event) {
+    if (confirm("Confirm that the shuttle is ready for takeoff.")) {
+      land.disabled = false;
+      takeoff.disabled = true;
+      moveUp.disabled = false;
+      moveDown.disabled = false;
+      moveRight.disabled = false;
+      moveLeft.disabled = false;
+      launched();
+    }
+  });
+  land.addEventListener("click", function(event) {
+    landing();
+    moveUp.disabled = true;
+    moveDown.disabled = true;
+    moveRight.disabled = true;
+    moveLeft.disabled = true;
+  })
+  missionAbort.addEventListener("click", function(event) {
+    if(confirm("Confirm that you want to abort the mission")) {
+      abort();
+      moveUp.disabled = true;
+      moveDown.disabled = true;
+      moveRight.disabled = true;
+      moveLeft.disabled = true;
+    }
+  })
+};
+
+function launched() {
+  flightStatus.innerHTML = "Shuttle in flight.";
+  shuttleBackground.style.backgroundColor = "blue";
+  altitude.innerHTML = parseInt(altitude.innerHTML) + 10000;
+  yPosPxl -= 10;
+  rocket.style.top = yPosPxl + "px"
+  
+  // Movement
+  moveUp.addEventListener("click", function(event) {
+    if (yPosPxl > 0) {
+      altitude.innerHTML = parseInt(altitude.innerHTML) + 10000;
+      yPosPxl -= 10;
+      rocket.style.top = yPosPxl + "px";
+    } else {
+      alert("Stay within the Atmosphere!")
+    }
+    
+  });
+  moveDown.addEventListener("click", function(event) {
+    if (parseInt(altitude.innerHTML) !== 0) {
+      altitude.innerHTML = parseInt(altitude.innerHTML) - 10000;
+      yPosPxl += 10
+      rocket.style.top = yPosPxl + "px";
+    } else {
+      alert("You are on the ground!");
+    };
+  });
+  moveRight.addEventListener("click", function(event) {
+    xTotalPxl = shuttleBackground.clientWidth;
+    xTotalPxl = Math.floor(xTotalPxl/10) * 10
+    if (xPosPxl < xTotalPxl/2 - 20) {
+      xPosPxl += 10;
+      rocket.style.left = xPosPxl + "px";
+    } else {
+      alert("Stay within the Atmosphere!");
+    }
+  });
+  moveLeft.addEventListener("click", function(event) {
+    xTotalPxl = shuttleBackground.clientWidth;
+    xTotalPxl = Math.floor(xTotalPxl/10) * 10
+    if (xPosPxl > xTotalPxl/-2 + 20) {
+      xPosPxl -= 10;
+      rocket.style.left = xPosPxl + "px";
+    } else {
+      alert("Stay within the Atmosphere!");
+    }
+  });
+
 }
+
+function landing() {
+  alert("The shuttle is landing. Landing gear engaged.");
+  flightStatus.innerHTML = "The shuttle has landed.";
+  altitude.innerHTML = 0;
+  yPosPxl = yTotalPxl -70;
+  rocket.style.top = yPosPxl + "px";
+  shuttleBackground.style.backgroundColor = "green";
+  land.disabled = true;
+  takeoff.disabled = false;
+}
+
+function abort() {
+  flightStatus.innerHTML = "Mission aborted.";
+  shuttleBackground.style.backgroundColor = "green";
+  altitude.innerHTML = 0;
+  land.disabled = true;
+  takeoff.disabled = false;
+  yPosPxl = yTotalPxl - 70;
+  rocket.style.top = yPosPxl + "px";
+  xPosPxl = 0;
+  rocket.style.left = xPosPxl + "px";
+}
+
+window.onload = init;
